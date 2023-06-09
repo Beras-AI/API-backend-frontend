@@ -8,7 +8,7 @@ import db from "../config/firebaseService.js";
 
 const firestore = getFirestore(db);
 const storage = getStorage(db);
-const bucket = storage.bucket("gs://test-c9862.appspot.com/");
+const bucket = storage.bucket("gs://capstone-388209.appspot.com");
 const v = new Validator();
 const collectionRef = firestore.collection("Articles");
 
