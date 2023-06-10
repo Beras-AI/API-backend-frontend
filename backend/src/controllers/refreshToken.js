@@ -14,10 +14,10 @@ const { REFRESH_TOKEN_SECRET, ACCESS_TOKEN_SECRET } = process.env;
 
 const refreshToken = async (req, res) => {
   try {
-    const refreshtoken = req.cookies.refreshToken;
-    if (!refreshtoken) return errorResponse(res, 401, "Unauthorized");
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) return errorResponse(res, 401, "Unauthorized");
     const querySnapshot = await collectionRef
-      .where("refresh_token", "==", refreshtoken)
+      .where("refresh_token", "==", refreshToken)
       .get();
 
     if (querySnapshot.empty) {
@@ -25,13 +25,15 @@ const refreshToken = async (req, res) => {
     }
 
     const userDoc = querySnapshot.docs[0];
-    const user = userDoc.data();
+    const userId = userDoc.id;
 
-    const decoded = jwt.verify(refreshtoken, REFRESH_TOKEN_SECRET);
+    const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
 
-    if (decoded.userId !== user.id) {
+    if (decoded.userId !== userId) {
       throw new Error("Token not valid for this user");
     }
+
+    const user = userDoc.data();
 
     const accessToken = jwt.sign(
       { userId: user.id, name: user.name, email: user.email },

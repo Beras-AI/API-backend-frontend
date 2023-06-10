@@ -20,11 +20,22 @@ const __dirname = dirname(__filename);
 app.use(express.static(path.join(__dirname, '../public')));
 app.get('/', (_, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
-app.use(cors());
+const whitelist = ["http://localhost:3000"];
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
 app.use(
   fileUpload({
-    limits: { fileSize: 1 * 1024 * 1024 },
+    limits: { fileSize: 10 * 1024 * 1024 },
   })
 );
 
