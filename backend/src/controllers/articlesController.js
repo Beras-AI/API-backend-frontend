@@ -14,32 +14,29 @@ const collectionRef = firestore.collection("Articles");
 
 export const getArticles = async (req, res) => {
   try {
-    const { title } = req.params;
+    const { id } = req.params;
     let articlesSnapShot;
-    if (title !== undefined) {
-      articlesSnapShot = await collectionRef.where("title", "==", title).get();
-      if (articlesSnapShot.empty) {
+    if (id !== undefined) {
+      articlesSnapShot = await collectionRef.doc(id).get();
+      if (!articlesSnapShot.exists) {
         // menggunakan .empty karena articlesSnapShot bukan dokumen, tapi QuerySnapshot
         return errorResponse(
           res,
           404,
-          "No Article Record Found with Title: " + title
+          "No Article Record Found with Id: " + id
         );
       }
-      const articlesArray = []; // membuat array untuk menampung hasil pencarian
-      articlesSnapShot.forEach((doc) => {
-        const articles = new Articles( // membuat objek Articles dari setiap dokumen yang ditemukan
-          doc.id,
-          doc.data().title,
-          doc.data().author,
-          doc.data().content,
-          doc.data().imageUrl,
-          doc.data().createdAt,
-          doc.data().updatedAt
-        );
-        articlesArray.push(articles); // memasukkan objek ke dalam array
-      });
-      return successResponse(res, articlesArray); // mengembalikan array yang berisi objek Articles ke client
+      const articlesData = articlesSnapShot.data();
+      const article = new Articles(
+        articlesSnapShot.id,
+        articlesData.title,
+        articlesData.author,
+        articlesData.content,
+        articlesData.imageUrl,
+        articlesData.createdAt,
+        articlesData.updatedAt
+      );
+      return successResponse(res, article); // mengembalikan array yang berisi objek Articles ke client
     } else {
       articlesSnapShot = await collectionRef.get();
       if (articlesSnapShot.empty) {

@@ -11,32 +11,23 @@ const collectionRef = firestore.collection("Prices");
 
 export const getPrices = async (req, res) => {
   try {
-    const { province } = req.params;
+    const { id } = req.params;
     let pricesSnapShot;
-    if (province !== undefined) {
-      pricesSnapShot = await collectionRef
-        .where("province", "==", province)
-        .get();
-      if (pricesSnapShot.empty) {
+    if (id !== undefined) {
+      pricesSnapShot = await collectionRef.doc(id).get();
+      if (!pricesSnapShot.exists) {
         // menggunakan .empty karena pricesSnapShot bukan dokumen, tapi QuerySnapshot
-        return errorResponse(
-          res,
-          404,
-          "No Price Record Found with Province: " + province
-        );
+        return errorResponse(res, 404, "No Price Record Found with Id: " + id);
       }
-      const pricesArray = []; // membuat array untuk menampung hasil pencarian
-      pricesSnapShot.forEach((doc) => {
-        const prices = new Prices( // membuat objek Prices dari setiap dokumen yang ditemukan
-          doc.id,
-          doc.data().province,
-          doc.data().price,
-          doc.data().createdAt,
-          doc.data().updatedAt
-        );
-        pricesArray.push(prices); // memasukkan objek ke dalam array
-      });
-      return successResponse(res, pricesArray); // mengembalikan array yang berisi objek prices ke client
+      const pricesData = pricesSnapShot.data();
+      const price = new Prices( // membuat objek Prices dari setiap dokumen yang ditemukan
+        pricesSnapShot.id,
+        pricesData.province,
+        pricesData.price,
+        pricesData.createdAt,
+        pricesData.updatedAt
+      );
+      return successResponse(res, price); // mengembalikan array yang berisi objek prices ke client
     } else {
       pricesSnapShot = await collectionRef.get();
       if (pricesSnapShot.empty) {

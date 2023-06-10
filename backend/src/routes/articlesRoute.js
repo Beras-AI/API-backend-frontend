@@ -9,7 +9,7 @@ import {
 const articlesRouter = express.Router();
 
 articlesRouter.get("/", getArticles);
-articlesRouter.get("/:title", getArticles);
+articlesRouter.get("/:id", getArticles);
 articlesRouter.post("/", createArticle);
 articlesRouter.put("/:id", updateArticle);
 articlesRouter.delete("/:id", deleteArticle);

@@ -9,7 +9,7 @@ import {
 const pricesRouter = express.Router();
 
 pricesRouter.get("/", getPrices);
-pricesRouter.get("/:province", getPrices);
+pricesRouter.get("/:id", getPrices);
 pricesRouter.post("/", createPrice);
 pricesRouter.put("/:id", updatePrice);
 pricesRouter.delete("/:id", deletePrice);

@@ -11,33 +11,28 @@ const collectionRef = firestore.collection("Tengkulaks");
 
 export const getTengkulaks = async (req, res) => {
   try {
-    const { address } = req.params;
+    const { id } = req.params;
     let tengkulaksSnapShot;
-    if (address !== undefined) {
-      tengkulaksSnapShot = await collectionRef
-        .where("address", "==", address)
-        .get();
-      if (tengkulaksSnapShot.empty) {
+    if (id !== undefined) {
+      tengkulaksSnapShot = await collectionRef.doc(id).get();
+      if (!tengkulaksSnapShot.exists) {
         // menggunakan .empty karena tengkulaksSnapShot bukan dokumen, tapi QuerySnapshot
         return errorResponse(
           res,
           404,
-          "No Tengkulak Record Found with Address: " + address
+          "No Tengkulak Record Found with Id: " + id
         );
       }
-      const tengkulaksArray = []; // membuat array untuk menampung hasil pencarian
-      tengkulaksSnapShot.forEach((doc) => {
-        const tengkulaks = new Tengkulaks( // membuat objek Tengkulaks dari setiap dokumen yang ditemukan
-          doc.id,
-          doc.data().name,
-          doc.data().address,
-          doc.data().phone,
-          doc.data().createdAt,
-          doc.data().updatedAt
-        );
-        tengkulaksArray.push(tengkulaks); // memasukkan objek ke dalam array
-      });
-      return successResponse(res, tengkulaksArray); // mengembalikan array yang berisi objek tengkulaks ke client
+      const tengkulaksData = tengkulaksSnapShot.data();
+      const tengkulaks = new Tengkulaks( // membuat objek Tengkulaks dari setiap dokumen yang ditemukan
+        tengkulaksSnapShot.id,
+        tengkulaksData.name,
+        tengkulaksData.address,
+        tengkulaksData.phone,
+        tengkulaksData.createdAt,
+        tengkulaksData.updatedAt
+      );
+      return successResponse(res, tengkulaks); // mengembalikan array yang berisi objek tengkulaks ke client
     } else {
       tengkulaksSnapShot = await collectionRef.get();
       if (tengkulaksSnapShot.empty) {

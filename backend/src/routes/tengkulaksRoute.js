@@ -9,7 +9,7 @@ import {
 const tengkulaksRouter = express.Router();
 
 tengkulaksRouter.get("/", getTengkulaks);
-tengkulaksRouter.get("/:address", getTengkulaks);
+tengkulaksRouter.get("/:id", getTengkulaks);
 tengkulaksRouter.post("/", createTengkulak);
 tengkulaksRouter.put("/:id", updateTengkulak);
 tengkulaksRouter.delete("/:id", deleteTengkulak);
