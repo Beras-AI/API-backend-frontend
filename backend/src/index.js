@@ -27,9 +27,9 @@ app.use(
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/articles", articlesRouter);
-app.use("/prices", pricesRouter);
-app.use("/tengkulaks", tengkulaksRouter);
+app.use("/api/articles", articlesRouter);
+app.use("/api/prices", pricesRouter);
+app.use("/api/tengkulaks", tengkulaksRouter);
 app.listen(5000, () => {
   console.log("Server running at port 5000");
 });
