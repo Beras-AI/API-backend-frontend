@@ -16,7 +16,6 @@ export const getTengkulaks = async (req, res) => {
     if (id !== undefined) {
       tengkulaksSnapShot = await collectionRef.doc(id).get();
       if (!tengkulaksSnapShot.exists) {
-        // menggunakan .empty karena tengkulaksSnapShot bukan dokumen, tapi QuerySnapshot
         return errorResponse(
           res,
           404,
@@ -24,7 +23,7 @@ export const getTengkulaks = async (req, res) => {
         );
       }
       const tengkulaksData = tengkulaksSnapShot.data();
-      const tengkulaks = new Tengkulaks( // membuat objek Tengkulaks dari setiap dokumen yang ditemukan
+      const tengkulaks = new Tengkulaks(
         tengkulaksSnapShot.id,
         tengkulaksData.name,
         tengkulaksData.address,
@@ -32,7 +31,7 @@ export const getTengkulaks = async (req, res) => {
         tengkulaksData.createdAt,
         tengkulaksData.updatedAt
       );
-      return successResponse(res, tengkulaks); // mengembalikan array yang berisi objek tengkulaks ke client
+      return successResponse(res, tengkulaks);
     } else {
       tengkulaksSnapShot = await collectionRef.get();
       if (tengkulaksSnapShot.empty) {
@@ -64,9 +63,10 @@ export const createTengkulak = async (req, res) => {
     address: { type: "string", min: 3, max: 255 },
     phone: { type: "string", min: 3, max: 255 },
   };
-  const validate = v.validate(req.body, schema);
-  if (validate.length) {
-    return errorResponse(res, 400, validate);
+  const validationResult = v.validate(req.body, schema);
+  if (validationResult.length > 0) {
+    const message = validationResult.map((result) => result.message);
+    return errorResponse(res, 400, message);
   }
   const now = moment().tz("Asia/Jakarta");
   try {
@@ -94,8 +94,6 @@ export const createTengkulak = async (req, res) => {
 export const updateTengkulak = async (req, res) => {
   const { id } = req.params;
   let { name, address, phone } = req.body;
-
-  // Cari dokumen dengan ID yang sesuai di firestore
   const docRef = collectionRef.doc(id);
   const docToUpdate = await docRef.get();
 
@@ -108,9 +106,10 @@ export const updateTengkulak = async (req, res) => {
     address: { type: "string", min: 3, max: 255 },
     phone: { type: "string", min: 3, max: 255 },
   };
-  const validate = v.validate(req.body, schema);
-  if (validate.length) {
-    return errorResponse(res, 400, validate);
+  const validationResult = v.validate(req.body, schema);
+  if (validationResult.length > 0) {
+    const message = validationResult.map((result) => result.message);
+    return errorResponse(res, 400, message);
   }
   const now = moment().tz("Asia/Jakarta");
 
@@ -143,7 +142,6 @@ export const deleteTengkulak = async (req, res) => {
   const docRef = collectionRef.doc(id);
 
   try {
-    // Get data artikel yang ingin dihapus sebelum dihapus
     const docToDelete = await docRef.get();
 
     if (!docToDelete.exists) {

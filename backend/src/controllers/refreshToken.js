@@ -1,5 +1,3 @@
-/* eslint-disable linebreak-style */
-/* eslint-disable no-console */
 import jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 import db from "../config/firebaseService.js";
@@ -25,18 +23,18 @@ const refreshToken = async (req, res) => {
     }
 
     const userDoc = querySnapshot.docs[0];
-    const userId = userDoc.id;
+    const id = userDoc.id;
 
     const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
 
-    if (decoded.userId !== userId) {
+    if (decoded.id !== id) {
       throw new Error("Token not valid for this user");
     }
 
     const user = userDoc.data();
 
     const accessToken = jwt.sign(
-      { userId: user.id, name: user.name, email: user.email },
+      { id: user.id, name: user.name, email: user.email },
       ACCESS_TOKEN_SECRET,
       {
         expiresIn: "15s",

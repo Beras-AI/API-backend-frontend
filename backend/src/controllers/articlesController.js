@@ -19,7 +19,6 @@ export const getArticles = async (req, res) => {
     if (id !== undefined) {
       articlesSnapShot = await collectionRef.doc(id).get();
       if (!articlesSnapShot.exists) {
-        // menggunakan .empty karena articlesSnapShot bukan dokumen, tapi QuerySnapshot
         return errorResponse(
           res,
           404,
@@ -36,7 +35,7 @@ export const getArticles = async (req, res) => {
         articlesData.createdAt,
         articlesData.updatedAt
       );
-      return successResponse(res, article); // mengembalikan array yang berisi objek Articles ke client
+      return successResponse(res, article); 
     } else {
       articlesSnapShot = await collectionRef.get();
       if (articlesSnapShot.empty) {
@@ -120,32 +119,25 @@ export const createArticle = async (req, res) => {
 export const updateArticle = async (req, res) => {
   const { id } = req.params;
   const { title, author, content } = req.body;
-
-  // Cari dokumen dengan ID yang sesuai di firestore
   const docRef = collectionRef.doc(id);
   const docToUpdate = await docRef.get();
 
   if (!docToUpdate) {
     return errorResponse(res, 404, "No Article Record Found");
   }
-
-  // Dapatkan URL image lama untuk artikel sebelum di update
   const oldImageUrl = docToUpdate.data().imageUrl;
-
-  // Buat schema validasi untuk memastikan input user valid
   const schema = {
     title: { type: "string", min: 3, max: 255 },
     author: { type: "string", min: 3, max: 255 },
     content: { type: "string", min: 3 },
   };
   const validate = v.validate(req.body, schema);
-  if (validate.length) {
-    return errorResponse(res, 400, validate);
-  }
+    if (validate.length) {
+      return res.status(400).json(validate);
+    }
 
   try {
     if (req.files && req.files.image) {
-      // Ambil data file baru dari request dan upload ke storage
       const buffer = req.files.image.data;
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
       const fileExt = req.files.image.name.split(".").pop();
@@ -177,7 +169,6 @@ export const updateArticle = async (req, res) => {
       await collectionRef.doc(id).update(dataToUpdate);
 
       if (oldImageUrl) {
-        // Ambil nama file lama saja dari URL
         const oldFileName = oldImageUrl.split("/").pop();
         const oldFileRef = bucket.file(`images/${oldFileName}`);
 
@@ -187,8 +178,6 @@ export const updateArticle = async (req, res) => {
           console.log("Error deleting old image file", error);
         }
       }
-
-      // Get data hasil update dan kirim sebagai response ke client
       const updatedDoc = await collectionRef.doc(id).get();
       const updatedData = new Articles(
         updatedDoc.id,
@@ -201,9 +190,6 @@ export const updateArticle = async (req, res) => {
       console.log("Article updated");
       return successResponse(res, updatedData);
     } else {
-      // User tidak mengirim file baru, cukup simpan seperti biasa
-
-      // Update data pada dokumen dengan data baru yang diberikan oleh user
       const now = moment().tz("Asia/Jakarta");
       const dataToUpdate = {
         title: title !== undefined ? title : docToUpdate.data().title,
@@ -213,8 +199,6 @@ export const updateArticle = async (req, res) => {
         updatedAt: Timestamp.fromDate(now.toDate()),
       };
       await collectionRef.doc(id).update(dataToUpdate);
-
-      // Get data hasil update dan kirim sebagai response ke client
       const updatedDoc = await collectionRef.doc(id).get();
       const updatedData = new Articles(
         updatedDoc.id,
@@ -237,17 +221,14 @@ export const deleteArticle = async (req, res) => {
   const docRef = collectionRef.doc(id);
 
   try {
-    // Get data artikel yang ingin dihapus sebelum dihapus
     const docToDelete = await docRef.get();
 
     if (!docToDelete.exists) {
       return errorResponse(res, 404, "No Article Record Found");
     }
 
-    // Hapus dokumen pada firestore
     await docRef.delete();
 
-    // Jika ada image pada artikel yang dihapus, hapus juga file image-nya dari storage
     if (docToDelete.data().imageUrl) {
       const fileName = docToDelete.data().imageUrl.split("/").pop();
       const fileRef = bucket.file(`images/${fileName}`);

@@ -20,7 +20,7 @@ const __dirname = dirname(__filename);
 app.use(express.static(path.join(__dirname, '../public')));
 app.get('/', (_, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
-const whitelist = ["http://localhost:3000"];
+const whitelist = ["http://localhost:5173"];
 const corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1 || !origin) {

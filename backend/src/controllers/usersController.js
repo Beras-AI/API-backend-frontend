@@ -17,7 +17,7 @@ const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = process.env;
 
 export const getUsers = async (req, res) => {
   try {
-    usersSnapShot = await collectionRef.get();
+    const usersSnapShot = await collectionRef.get();
     if (usersSnapShot.empty) {
       return errorResponse(res, 404, "No User Record Found");
     }
@@ -27,7 +27,10 @@ export const getUsers = async (req, res) => {
       usersArray.push(users);
     });
     return successResponse(res, usersArray);
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+    return errorResponse(res);
+  }
 };
 
 export const createUser = async (req, res) => {
@@ -43,9 +46,10 @@ export const createUser = async (req, res) => {
       password: { type: "string", min: 8, max: 255 },
       confPassword: { type: "string", min: 8, max: 255 },
     };
-    const validate = v.validate(req.body, schema);
-    if (validate.length) {
-      return errorResponse(res, 400, validate);
+    const validationResult = v.validate(req.body, schema);
+    if (validationResult.length > 0) {
+      const message = validationResult.map((result) => result.message);
+      return errorResponse(res, 400, message);
     }
     if (password !== confPassword) {
       return errorResponse(res, 400, "Password & Confirm Password not match");
@@ -81,35 +85,31 @@ export const createUser = async (req, res) => {
 
 export const Login = async (req, res) => {
   const { email, password } = req.body;
-  const schema = {
-    email: { type: "email", min: 3, max: 255 },
-    password: { type: "string", min: 8, max: 255 },
-  };
-  const validate = v.validate(req.body, schema);
-  if (validate.length) {
-    return errorResponse(res, 400, validate);
-  }
 
   try {
-    const querySnapshot = await collectionRef
-      .where("email", "==", email)
-      .get();
-
-    if (querySnapshot.empty) {
-      return errorResponse(res, `Email ${email} tidak ditemukan`, 404);
+    const schema = {
+      email: { type: "email", min: 3, max: 255 },
+      password: { type: "string", min: 8, max: 255 },
+    };
+    const validationResult = v.validate(req.body, schema);
+    if (validationResult.length > 0) {
+      const message = validationResult.map((result) => result.message);
+      return errorResponse(res, 400, message);
+    }
+    const snapshot = await collectionRef.where("email", "==", email).get();
+    if (snapshot.empty) {
+      return errorResponse(res, 404, `Email '${email}' not found`);
     }
 
-    const userDoc = querySnapshot.docs[0];
+    const userDoc = snapshot.docs[0];
     const userData = userDoc.data();
-
     const isPasswordMatch = await bcrypt.compare(password, userData.password);
-
     if (!isPasswordMatch) {
-      return errorResponse(res, "Password salah", 400);
+      return errorResponse(res, 400, "Wrong password")
     }
     const accessToken = jwt.sign(
       {
-        userId: userDoc.id,
+        id: userDoc.id,
         name: userData.name,
         email,
       },
@@ -118,10 +118,9 @@ export const Login = async (req, res) => {
         expiresIn: "20s",
       }
     );
-
     const refreshToken = jwt.sign(
       {
-        userId: userDoc.id,
+        id: userDoc.id,
         name: userData.name,
         email,
       },
@@ -130,23 +129,23 @@ export const Login = async (req, res) => {
         expiresIn: "1d",
       }
     );
-    await userDoc.ref.update({ refresh_token: refreshToken });
+    await userDoc.ref.update({
+      refresh_token: refreshToken,
+    });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
-      //secure: true, aktifkan jika menggunakan https
+      // secure: true, aktifkan jika menggunakan HTTPS
     });
-
-    return successResponse(res, { accessToken });
+    return res.json({
+      accessToken,
+    });
   } catch (error) {
-    console.log(error);
-    return errorResponse(
-      res,
-      500,
-      `Terjadi kesalahan saat mencari email ${email}. Silakan coba lagi`
-    );
+    console.error(error);
+    return errorResponse(res);
   }
 };
+
 
 export const deleteUser = async (req, res) => {
   const { id } = req.params;

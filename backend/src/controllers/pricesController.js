@@ -16,18 +16,17 @@ export const getPrices = async (req, res) => {
     if (id !== undefined) {
       pricesSnapShot = await collectionRef.doc(id).get();
       if (!pricesSnapShot.exists) {
-        // menggunakan .empty karena pricesSnapShot bukan dokumen, tapi QuerySnapshot
         return errorResponse(res, 404, "No Price Record Found with Id: " + id);
       }
       const pricesData = pricesSnapShot.data();
-      const price = new Prices( // membuat objek Prices dari setiap dokumen yang ditemukan
+      const price = new Prices( 
         pricesSnapShot.id,
         pricesData.province,
         pricesData.price,
         pricesData.createdAt,
         pricesData.updatedAt
       );
-      return successResponse(res, price); // mengembalikan array yang berisi objek prices ke client
+      return successResponse(res, price); 
     } else {
       pricesSnapShot = await collectionRef.get();
       if (pricesSnapShot.empty) {
@@ -57,9 +56,10 @@ export const createPrice = async (req, res) => {
     province: { type: "string", min: 3, max: 255 },
     price: { type: "string", min: 3, max: 255 },
   };
-  const validate = v.validate(req.body, schema);
-  if (validate.length) {
-    return errorResponse(res, 400, validate);
+  const validationResult = v.validate(req.body, schema);
+  if (validationResult.length > 0) {
+    const message = validationResult.map((result) => result.message);
+    return errorResponse(res, 400, message);
   }
   if (!price.match(/^\d*(\.\d+)?$/)) {
     return errorResponse(res, 400, "price is'n number!");
@@ -91,7 +91,6 @@ export const updatePrice = async (req, res) => {
   const { id } = req.params;
   let { province, price } = req.body;
 
-  // Cari dokumen dengan ID yang sesuai di firestore
   const docRef = collectionRef.doc(id);
   const docToUpdate = await docRef.get();
 
@@ -103,9 +102,10 @@ export const updatePrice = async (req, res) => {
     province: { type: "string", min: 3, max: 255 },
     price: { type: "string", min: 3, max: 255 },
   };
-  const validate = v.validate(req.body, schema);
-  if (validate.length) {
-    return errorResponse(res, 400, validate);
+  const validationResult = v.validate(req.body, schema);
+  if (validationResult.length > 0) {
+    const message = validationResult.map((result) => result.message);
+    return errorResponse(res, 400, message);
   }
   if (!price.match(/^\d*(\.\d+)?$/)) {
     return errorResponse(res, 400, "price is'n number!");
@@ -140,7 +140,6 @@ export const deletePrice = async (req, res) => {
   const docRef = collectionRef.doc(id);
 
   try {
-    // Get data artikel yang ingin dihapus sebelum dihapus
     const docToDelete = await docRef.get();
 
     if (!docToDelete.exists) {
