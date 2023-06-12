@@ -10,9 +10,9 @@ import {
 } from "../controllers/usersController.js";
 const usersRouter = express.Router();
 
-usersRouter.get("/users",  verifyToken, getUsers);
-usersRouter.post("/users", createUser);
-usersRouter.delete("/users/:id", deleteUser);
+usersRouter.get("/users", verifyToken, getUsers);
+usersRouter.post("/users", verifyToken, createUser);
+usersRouter.delete("/users/:id", verifyToken, deleteUser);
 usersRouter.post("/login", Login);
 usersRouter.get("/token", refreshToken);
 usersRouter.delete("/logout", Logout);

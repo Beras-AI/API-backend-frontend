@@ -5,13 +5,14 @@ import {
   getArticles,
   updateArticle,
 } from "../controllers/articlesController.js";
+import verifyToken from "../middleware/verifyToken.js";
 
 const articlesRouter = express.Router();
 
 articlesRouter.get("/", getArticles);
 articlesRouter.get("/:id", getArticles);
-articlesRouter.post("/", createArticle);
-articlesRouter.put("/:id", updateArticle);
-articlesRouter.delete("/:id", deleteArticle);
+articlesRouter.post("/", verifyToken, createArticle);
+articlesRouter.put("/:id", verifyToken, updateArticle);
+articlesRouter.delete("/:id", verifyToken, deleteArticle);
 
 export default articlesRouter;
