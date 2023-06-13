@@ -30,15 +30,3 @@ export class Tengkulaks {
         this.updatedAt = updatedAt;
     }
 }
-
-export class Users {
-    constructor(id, name, email, password, refresh_token, createdAt,updatedAt){
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.refresh_token = refresh_token;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-}
