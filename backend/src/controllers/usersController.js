@@ -13,7 +13,6 @@ const v = new Validator();
 
 const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = process.env;
 
-
 export const Login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -36,7 +35,7 @@ export const Login = async (req, res) => {
     const userData = userDoc.data();
     const isPasswordMatch = await bcrypt.compare(password, userData.password);
     if (!isPasswordMatch) {
-      return errorResponse(res, 400, "Wrong password")
+      return errorResponse(res, 400, "Wrong password");
     }
     const accessToken = jwt.sign(
       {
@@ -66,7 +65,8 @@ export const Login = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
-      // secure: true, aktifkan jika menggunakan HTTPS
+      secure: true,
+      sameSite: "none",
     });
     return res.json({
       accessToken,
@@ -76,7 +76,6 @@ export const Login = async (req, res) => {
     return errorResponse(res);
   }
 };
-
 
 export const Logout = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
@@ -98,7 +97,10 @@ export const Logout = async (req, res) => {
 
     await userDoc.ref.update({ refresh_token: null });
 
-    res.clearCookie("refreshToken");
+    res.clearCookie("refreshToken", {
+      secure: true,
+      sameSite: "none",
+    });
 
     return successResponse(res, null);
   } catch (error) {
