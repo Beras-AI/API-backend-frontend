@@ -4,8 +4,6 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import fileUpload from "express-fileupload";
 import cors from "cors";
-import { fileURLToPath } from 'url';
-import path, { dirname } from 'path';
 import articlesRouter from "./routes/articlesRoute.js";
 import pricesRouter from "./routes/pricesRoute.js";
 import tengkulaksRouter from "./routes/tengkulaksRoute.js";
@@ -14,13 +12,7 @@ import usersRouter from "./routes/usersRoute.js";
 dotenv.config();
 const app = express();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-app.use(express.static(path.join(__dirname, '../public')));
-app.get('/', (_, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
-
-const whitelist = ["http://localhost:5173"];
+const whitelist = ["http://localhost:8080"];
 const corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1 || !origin) {
