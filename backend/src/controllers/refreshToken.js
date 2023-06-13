@@ -34,7 +34,7 @@ const refreshToken = async (req, res) => {
     const user = userDoc.data();
 
     const accessToken = jwt.sign(
-      { id: user.id, name: user.name, email: user.email },
+      { id: id, name: user.name, email: user.email },
       ACCESS_TOKEN_SECRET,
       {
         expiresIn: "15s",
