@@ -39,7 +39,6 @@ export const Login = async (req, res) => {
     }
     const accessToken = jwt.sign(
       {
-        id: userDoc.id,
         name: userData.name,
         email,
       },
@@ -50,7 +49,6 @@ export const Login = async (req, res) => {
     );
     const refreshToken = jwt.sign(
       {
-        id: userDoc.id,
         name: userData.name,
         email,
       },

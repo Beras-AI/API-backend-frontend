@@ -23,18 +23,18 @@ const refreshToken = async (req, res) => {
     }
 
     const userDoc = querySnapshot.docs[0];
-    const id = userDoc.id;
+    const user = userDoc.data();
 
     const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
 
-    if (decoded.id !== id) {
+    if (decoded.email !== user.email) {
       throw new Error("Token not valid for this user");
     }
 
-    const user = userDoc.data();
+    
 
     const accessToken = jwt.sign(
-      { id: id, name: user.name, email: user.email },
+      {name: user.name, email: user.email },
       ACCESS_TOKEN_SECRET,
       {
         expiresIn: "15s",
