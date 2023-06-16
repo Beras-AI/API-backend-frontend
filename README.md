@@ -14,7 +14,7 @@
 * Frontend : React.Js
 * Database : Firestore 
 * Admin Authentication : Json web token 
-* Postman : Test API
+* Test API : Postman
 
 ## Prerequisites
 #### Before starting the API development process, ensure that you have the following prerequisites installed:
